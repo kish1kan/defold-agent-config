@@ -93,7 +93,7 @@
 
 在 Defold 编辑器中打开项目，并同时打开 AI Agent 。你可以尝试以下指令：
 
-- **“创建一个名为 `main_menu` 的新屏幕，包含两个按钮：‘开始游戏’和‘设置’”** —— AI Agent 将使用 `monarch-screen-setup` 来创建 screen collection、GUI 和 script 。
+- **“创建一个名为 `main_menu` 的新屏幕，包含两个按钮：‘开始游戏’和‘设置’”** —— AI Agent 将使用 `monarch-screen-setup` 创建 screen collection，并使用 `druid-ui-setup` 创建 GUI 按钮。
 - **“添加一个玩家游戏对象，带有精灵图和碰撞体”** —— AI Agent 将使用 `defold-proto-file-editing` 来创建 `.go`、`.sprite` 和 `.collisionobject` 文件。
 - **“编写一个脚本，允许使用箭头键控制玩家左右移动”** —— AI Agent 将查找 Defold 输入 API 并根据项目规范编写 `.script`。
 - **“编译并运行游戏”** —— AI Agent 将使用 `defold-project-build` 通过运行中的 Defold 编辑器进行编译，并报告任何错误。
@@ -129,6 +129,7 @@
 | **defold-scripts-editing** | 辅助编辑 Lua 脚本 |
 | **defold-shaders-editing** | 创建和编辑 Defold 着色器文件 (.vp, .fp, .glsl) |
 | **defold-skill-maintain** | 维护和更新技能定义 |
+| **druid-ui-setup** | 使用 Druid 组件框架创建游戏 UI（按钮、列表、控件、HUD） |
 | **monarch-screen-setup** | 使用 Monarch 设置屏幕和弹出窗口 |
 | **xmath-usage** | xmath API 参考及无分配数学优化模式 |
 
@@ -136,6 +137,7 @@
 
 `AGENTS.md` 配置包含对项目中以下库的内置支持：
 
+- **[Druid](https://github.com/Insality/druid)** —— GUI 组件框架（按钮、列表、控件）
 - **[Monarch](https://github.com/britzl/monarch)** —— 屏幕和弹出窗口管理
 - **[Object Interpolation](https://github.com/indiesoftby/defold-object-interpolation)** —— 具有固定时间步长的平滑物体运动
 - **[Sharp Sprite](https://github.com/indiesoftby/defold-sharp-sprite)** —— 带有 RGSS 材质的像素完美精灵渲染

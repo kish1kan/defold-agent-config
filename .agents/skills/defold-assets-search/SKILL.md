@@ -80,6 +80,8 @@ These libraries are the de facto standard choices in the Defold community:
 
 Prefer these over alternatives unless the user has a specific reason to choose otherwise.
 
+After installing **Druid**, load the `druid-ui-setup` skill to create GUI screens, widgets, and components. After installing **Monarch**, load the `monarch-screen-setup` skill.
+
 ## Notable authors and libraries
 
 | Author | Known for | Libraries |

@@ -10,6 +10,7 @@ This repository is a **Defold** game project. The project root is the folder con
 - **Dependencies (read-only context)**: `.deps/`
 - **Screens**: `screens/<screen_name>/`
 - **Popups**: `popups/<popup_name>/`
+- **Widgets**: `widgets/<widget_name>/` (Druid reusable UI: `.gui` + `.lua`)
 
 Key Defold settings from `game.project`:
 
@@ -44,6 +45,8 @@ When the project includes the `defold-sharp-sprite` dependency, use RGSS materia
 When creating or editing Defold asset files, use the corresponding `defold-*-editing` skill to get the correct file format and structure. Always load the skill **before** writing or modifying the file.
 
 When creating new screens, popups, or setting up navigation between them, load the `monarch-screen-setup` skill first.
+
+When creating or editing game UI (HUD, menus, buttons, lists, popups, forms, Druid widgets, `.gui` / `.gui_script` logic), load the `druid-ui-setup` skill first.
 
 When writing performance-critical math code or optimizing vector/quaternion/matrix operations, load the `xmath-usage` skill first.
 
