@@ -93,7 +93,7 @@ For other agents, look for workarounds in their documentation (ignore files, ind
 
 Open your project in Defold Editor and your AI agent side by side. Here's what you can do:
 
-- **"Create a new screen called `main_menu` with two buttons: Play and Settings"** - the agent will use `monarch-screen-setup` to scaffold the screen collection, GUI, and script.
+- **"Create a new screen called `main_menu` with two buttons: Play and Settings"** - the agent will use `monarch-screen-setup` for the screen collection and `druid-ui-setup` for the GUI buttons.
 - **"Add a player game object with a sprite and collision"** - the agent will use `defold-proto-file-editing` to create `.go`, `.sprite`, and `.collisionobject` files.
 - **"Write a script that moves the player left and right with arrow keys"** - the agent will look up the Defold input API and write a `.script` following project conventions.
 - **"Build and run the game"** - the agent will use `defold-project-build` to compile via the running Defold Editor and report any errors.
@@ -129,6 +129,7 @@ The following skills are included in `.agents/skills/`:
 | **defold-scripts-editing** | Assists with Lua script editing |
 | **defold-shaders-editing** | Creates and edits Defold shader files (.vp, .fp, .glsl) |
 | **defold-skill-maintain** | Maintains and updates skill definitions |
+| **druid-ui-setup** | Creates game UI with the Druid component framework (buttons, lists, widgets, HUD) |
 | **monarch-screen-setup** | Sets up screens and popups using Monarch screen manager |
 | **xmath-usage** | Provides xmath API reference and in-place math optimization patterns |
 
@@ -136,6 +137,7 @@ The following skills are included in `.agents/skills/`:
 
 The `AGENTS.md` configuration includes built-in awareness of these Defold libraries when they are present in your project:
 
+- **[Druid](https://github.com/Insality/druid)** - GUI component framework (buttons, lists, widgets)
 - **[Monarch](https://github.com/britzl/monarch)** - Screen and popup management
 - **[Object Interpolation](https://github.com/indiesoftby/defold-object-interpolation)** - Smooth object movement with fixed timestep
 - **[Sharp Sprite](https://github.com/indiesoftby/defold-sharp-sprite)** - Pixel-perfect sprite rendering with RGSS materials

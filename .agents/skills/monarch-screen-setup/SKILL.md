@@ -19,6 +19,8 @@ dependencies#N = https://github.com/britzl/monarch/archive/refs/tags/5.2.0.zip
 
 This skill describes the conventions for creating and managing screens (via collectionproxy) and popups (via collectionfactory) in a Defold project using the Monarch library.
 
+For GUI behaviour inside those screens and popups (buttons, lists, HUD, widgets), load the `druid-ui-setup` skill. This skill only covers Monarch registration and navigation.
+
 ## Naming Rules
 
 - All screen and popup names use `snake_case`.
