@@ -1,108 +1,69 @@
 # Agent Instructions
 
-This repository is a **Defold** game project. The project root is the folder containing `game.project`.
+## Scope and priorities
 
-## Project map
+This file applies to the entire repository. A nested `AGENTS.md`, if added later, may define stricter rules for its directory.
 
-- **Root config**: `game.project`
-- **Main game content**: `main/` (collections, game objects, scripts)
-- **Assets**: `assets/` (app icons, images)
-- **Dependencies (read-only context)**: `.deps/`
-- **Screens**: `screens/<screen_name>/`
-- **Popups**: `popups/<popup_name>/`
-- **Widgets**: `widgets/<widget_name>/` (Druid reusable UI: `.gui` + `.lua`)
+- `MUST` and `NEVER` mark correctness, safety, or architecture requirements.
+- `SHOULD` marks the default preference; deviate only when the task requires it and explain why.
+- Project-specific rules in this file take priority over generic Defold conventions.
 
-Key Defold settings from `game.project`:
+## Project facts
 
-- **Bootstrap collection**: `/main/main.collection`
+This is a **Defold** game project. Run project commands from the repository root containing `game.project`.
 
-**Resource paths in `game.project`**: Values like `main_collection`, `game_binding`, `app_icon` use Defold resource identifiers. A trailing `c` suffix denotes compiled resources and is expected — do not treat it as a typo.
+- Bootstrap collection: `/main/main.collection`
+- Main content: `main/`
+- Screens: `screens/<screen_name>/`
+- Popups: `popups/<popup_name>/`
+- Reusable Druid widgets: `widgets/<widget_name>/`
+- Assets: `assets/`
+- Game modules: `modules/`
+- Read-only dependency context: `.deps/`
+- Declared libraries: Monarch, object interpolation, and Sharp Sprite
 
-## Include directories
+Values such as `main_collection`, `game_binding`, and `app_icon` in `game.project` are Defold resource identifiers. A trailing `c` denotes a compiled resource and is expected.
 
-- Use `.deps/` as an include directory for resolving module references and understanding dependency APIs.
-- **NEVER modify any files inside `.deps/`** - these are downloaded dependencies provided strictly as read-only context.
+## Hard constraints
 
-## Defold file formats
+- NEVER edit files under `.deps/`. Use them only to resolve modules and inspect dependency APIs.
+- If `.deps/` is missing or empty, or a dependency URL in `game.project` changes, load and run the `defold-project-setup` skill before other project work.
+- Keep Defold resource paths absolute where the engine expects them, for example `/assets/...`.
+- For new or modified Sprite, Spine, GUI, ParticleFX, Tilemap, Font, and Label resources, use RGSS materials from `/sharp_sprite/rgss/` instead of built-in materials. Existing legacy references in `popups/popup_example/popup_example.gui` and `assets/fonts/Unbounded-ExtraBold-50.font` may remain until those resources are touched; do not perform an unrelated repository-wide migration.
+- GUI scripts MUST NOT import or read domain/game-state modules directly. Business data must arrive through messages. UI and navigation libraries such as Druid and Monarch are allowed.
+- Store per-instance state in `self` in `.script`, `.gui_script`, and `.render_script` files. Module-level locals are shared across instances and are only for constants, functions, and stateless dependency handles returned by `require`.
+- Pair acquired resources with their lifecycle cleanup: release input focus in `final()`, unregister persistent listeners such as `window.set_listener(nil)`, and cancel timers when their intended lifetime is shorter than the script lifetime. Defold destroys a script's timers with the script, so redundant deletion-time cancellation is not required.
 
-- **Lua scripts**: `.lua`, `.script`, `.gui_script`, `.render_script`, `.editor_script`.
-- **Metadata assets** (Protocol Buffer Text Format): `.collection`, `.go`, `.sprite`, `.tilemap`, `.tilesource`, `.atlas`, `.font`, `.particlefx`, `.sound`, `.label`, `.gui`, `.model`, `.mesh`, `.material`, `.collisionobject`, `.texture_profiles`, `.display_profiles`.
-- **Manifests** (YAML): `.appmanifest`, `.manifest` - platform-specific libraries and build flags.
-- **Buffers** (JSON): `.buffer` - streams of data (positions, colors, etc.) used as input for Mesh components.
-- **Shaders** (GLSL): `.vp`, `.fp`, `.glsl`.
-- **Project config** (INI): `game.project`.
-- **Properties** (INI): `game.properties`, `ext.properties` - parameters available in `game.project`.
-- **2D assets**: `.png`, `.jpg`.
-- **3D assets** (GTLF): `.gltf`, `.glb`.
-- **Sound assets**: `.ogg`, `.wav`, `.opus` (OPUS requires modification of the appmanifest).
+## Task-to-skill routing
 
-## Sharp Sprite materials
+Load only the skills relevant to the files being changed, in this order when rules overlap:
 
-When the project includes the `defold-sharp-sprite` dependency, use RGSS materials from `/sharp_sprite/rgss/` instead of builtins for all supported component types: Sprite, Spine, GUI, ParticleFX, Tilemap, Font, Label.
+1. Use `defold-project-setup` first when dependency setup is required.
+2. For a new screen, popup, or navigation flow, load `monarch-screen-setup`.
+3. For HUDs, menus, forms, popups, Druid widgets, or `.gui`/`.gui_script` UI, load `druid-ui-setup`.
+4. Before editing Defold protobuf text resources such as `.collection`, `.go`, or `.gui`, load `defold-proto-file-editing`.
+5. Before editing Lua, `.script`, or `.gui_script`, load `defold-scripts-editing`.
+6. Before editing shaders or native extensions, load the corresponding `defold-shaders-editing` or `defold-native-extension-editing` skill.
+7. For performance-critical vector, quaternion, or matrix code, load `xmath-usage`.
 
-## Editing Defold assets
+Use only documented Defold APIs. Load `defold-api-fetch` when adding, changing, or uncertain about an engine API; use `defold-docs-fetch` for concepts and `defold-examples-fetch` for implementation patterns. Existing, unchanged API calls do not need to be re-researched.
 
-When creating or editing Defold asset files, use the corresponding `defold-*-editing` skill to get the correct file format and structure. Always load the skill **before** writing or modifying the file.
+## Code conventions
 
-When creating new screens, popups, or setting up navigation between them, load the `monarch-screen-setup` skill first.
+- Use tabs for Lua indentation. Keep empty lines empty and remove trailing whitespace.
+- Use `snake_case` for variables, functions, files, and folders; use `UPPER_CASE` for module-level constants.
+- Use LuaCATS (`---@...`) for module/public API documentation and non-obvious data shapes.
+- Call `require` with parentheses and a root-relative dotted module name: `require("modules.best_time")`. Do not use slashes or a leading slash.
+- Define named local functions at module scope, not inside other functions. Inline anonymous callbacks are allowed.
+- Prefer functional, data-oriented modules. Do not use metatables to imitate classes.
+- Do not repeatedly check internal fields established by the same code path. Validate data at trust boundaries such as messages, saved data, network responses, and user input.
+- Inline a hash used once. Reused hash values may be module-level `UPPER_CASE` constants.
+- Log initialization, state transitions, persistence operations, and errors when useful. Do not add per-frame or noisy polling logs.
 
-When creating or editing game UI (HUD, menus, buttons, lists, popups, forms, Druid widgets, `.gui` / `.gui_script` logic), load the `druid-ui-setup` skill first.
+## Validation
 
-When writing performance-critical math code or optimizing vector/quaternion/matrix operations, load the `xmath-usage` skill first.
-
-## Code style guidelines
-
-### Lua scripts (.lua, .script, .gui_script, .render_script, .editor_script)
-
-- **Indentation**: 1 tab (4 spaces).
-- **Naming**: `snake_case` for variables, functions, files, and folders. Keep resource paths absolute (`/assets/...`) where Defold expects them.
-- **Comments**:
-  - Use **LuaCATS** (`---@...`) annotations for types, module/public API docs.
-- **Whitespace**:
-  - Empty lines must be truly empty (no spaces/tabs).
-  - Avoid trailing whitespace.
-- **Defold API**: strictly follow the Defold API - always verify against the official documentation using the `defold-api-fetch` skill. There are no hidden or undocumented APIs - only use functions, messages, and properties that are explicitly described in the docs. For conceptual guidance on how Defold features work (components, physics, rendering, input, etc.), use the `defold-docs-fetch` skill. For practical implementation patterns and sample code, use the `defold-examples-fetch` skill.
-- **Defensive checks**: Do NOT assume data is missing or constantly re-check field existence in tables. If YOU set a field, it EXISTS. Similarly, do NOT check for standard Lua API availability (e.g., `io` and `io.open` always exist in standard Lua). Avoid unnecessary defensive programming.
-- **Paradigm**: do not use metatables or imitate classes. Use functional, data-based structures only.
-- **Logging**: use `print()` to look at the game state. Add logs for transactions, initializations, important events.
-- **GUI and game state separation**: GUI scripts (`.gui_script`) should NOT directly access game logic modules. All communication between game logic and UI must be message-based (`msg.post()`) to maintain clear separation of concerns. GUI should be purely data-driven, receiving all necessary data through messages and updating its display accordingly. This ensures UI remains decoupled from game implementation details.
-- **Script instance state**: In `.script`, `.gui_script`, `.render_script` files, store instance-specific state in the `self` table, NOT in local module variables. Local variables at the module level are shared across ALL instances of the script, which causes bugs when multiple instances exist. Use `self.my_variable` instead of `local my_variable`. Not applicable for local functions - keep them local. If you need to call local function that it's defined below, to use forward declarations or reorganize the functions.
-- **Local functions**: NEVER create local functions inside other functions. Local functions are only allowed at module scope. Anonymous lambda functions (inline callbacks) are acceptable.
-- **require**: 
-  - Always call `require` with parentheses: `require("module")`, NOT `require "module"`.
-  - Use dot notation for module paths: `require("screens.flappy_bird.gameplay")`, NOT `require("/screens/flappy_bird/gameplay")`.
-  - Module paths are relative to the project root and use dots (`.`) instead of slashes (`/`) as separators.
-  - Do NOT use leading slashes in require paths.
-  - Examples: `require("monarch.monarch")`, `require("screens.flappy_bird.gameplay")`, `require("main.utils")`.
-- **Hash values**: `hash("...")` can be left inline without premature optimization. It's acceptable to use `message_id == hash("trigger_response")` directly. If you need to reuse a hash value multiple times, you can declare it as a module-level constant in `UPPER_CASE` format: `local TRIGGER_RESPONSE = hash("trigger_response")`.
-- **Constants**: Module-level constants can be declared as local variables in `UPPER_CASE` format: `local TRIGGER_RESPONSE = hash("trigger_response")`, `local MAX_HEALTH = 100`.
-- **msg.url format**: Always remember the format `[socket:][path][#fragment]`:
-  - `socket` - collection name (world)
-  - `path` - game object instance id (can be relative or global)
-  - `fragment` - component id
-  - Shorthands: `"."` for current game object, `"#"` for current component
-  - Examples: `msg.url("#my_component")`, `msg.url("collection:/path/to/go#component")`, `msg.url(socket, path, fragment)`, `msg.url(nil, hash("id"), hash("script"))`, `msg.url(nil, go.get_id("physics"), "collisionobject")`
-
-### Python
-
-- Write for Python 3.11. Do NOT write code to support earlier versions of Python. Always use modern Python practices appropriate for Python 3.11. Always use full type annotations, generics, and other modern practices.
-
-## Shell
-
-- **Windows**: use PowerShell.
-- **Linux**: use bash.
-- **macOS**: use zsh.
-
-## Commands
-
-All commands run from the project root (the folder with `game.project`).
-
-- **Build & Run via editor** - use the `defold-project-build` skill. Requires the Defold editor to be running with the project open. Builds the project, returns compilation errors, and launches the game if the build succeeds.
-
-## Validation checklist
-
-- Build via the running editor succeeds (`defold-project-build` skill).
-
-## Important repo-specific caveats
-
-- **Git commit messages**: use the following format: `Short description` in English language ONLY.
+- Lua or Defold resource changes MUST build successfully through the running editor using `defold-project-build`.
+- UI, input, navigation, or lifecycle changes SHOULD receive a focused smoke test of the affected flow in addition to a successful build.
+- Dependency changes MUST be followed by `defold-project-setup` before building.
+- If the editor or another required validator is unavailable, report the validation as not run; do not claim success.
+- Git commit messages MUST be short descriptions in English.
